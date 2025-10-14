@@ -1,20 +1,38 @@
 workflows:
   android_apk_debug:
-    name: Android APK (Debug - Free Safe)
+    name: Android APK (Debug - Free Plan)
     max_build_duration: 60
+    instance_type: linux
     environment:
       node: 20
       java: 17
     scripts:
+      - name: Papar struktur projek
+        script: |
+          pwd
+          ls -la
+          echo "--- tools/"
+          [ -d tools ] && ls -la tools | head -n 30 || echo "tools/ tiada"
+          echo "--- android/"
+          [ -d android ] && ls -la android | head -n 30 || echo "android/ tiada"
       - name: Install dependencies
         script: |
           if [ -f package-lock.json ]; then npm ci; else npm i; fi
-      - name: (Optional) Expo prebuild
+          node -v
+          npm -v
+      - name: Expo prebuild (jika android/ tiada)
         script: |
           if [ ! -d android ] || [ ! -f android/gradlew ]; then
             npx --yes expo prebuild --platform android || true
           else
             echo "android/ sudah ada — skip prebuild"
+          fi
+      - name: Jalankan autopatch (optional)
+        script: |
+          if [ -f tools/autopatch_tools_android.sh ]; then
+            bash tools/autopatch_tools_android.sh
+          else
+            echo "autopatch_tools_android.sh tiada — terus build"
           fi
       - name: Build APK (Debug)
         script: |
@@ -25,8 +43,9 @@ workflows:
       - android/app/build/outputs/**/*.apk
 
   android_apk_release:
-    name: Android APK (Release - Free Safe)
+    name: Android APK (Release - Free Plan)
     max_build_duration: 60
+    instance_type: linux
     environment:
       node: 20
       java: 17
@@ -36,12 +55,12 @@ workflows:
       - name: Install dependencies
         script: |
           if [ -f package-lock.json ]; then npm ci; else npm i; fi
-      - name: (Optional) Expo prebuild
+      - name: (Opsyenal) Expo prebuild
         script: |
           if [ ! -d android ] || [ ! -f android/gradlew ]; then
             npx --yes expo prebuild --platform android || true
           else
-            echo "android/ sudah ada — skip prebuild"
+            echo "android/ sudah ada — skip expo prebuild"
           fi
       - name: Jalankan autopatch (signing env)
         script: |
