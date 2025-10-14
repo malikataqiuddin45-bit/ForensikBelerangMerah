@@ -1,60 +1,21 @@
 workflows:
-  android_apk_debug_free_safe:
-    name: Android APK (Debug - Free Safe)
+  expo_apk_debug_native:
+    name: Expo APK Debug (Native)
     max_build_duration: 60
     environment:
+      vars:
+        NODE_OPTIONS: --max-old-space-size=4096
       node: 20
       java: 17
+    triggering:
+      events: [ push ]
+      branch_patterns:
+        - pattern: main
+          include: true
     scripts:
-      - name: Install dependencies
-        script: |
-          if [ -f package-lock.json ]; then npm ci; else npm i; fi
-      - name: (Optional) Expo prebuild
-        script: |
-          if [ ! -d android ] || [ ! -f android/gradlew ]; then
-            npx --yes expo prebuild --platform android || true
-          else
-            echo "android/ sudah ada — skip prebuild"
-          fi
-      - name: Build APK (Debug)
-        script: |
-          cd android
-          chmod +x ./gradlew || true
-          ./gradlew assembleDebug --no-daemon --stacktrace
+      - name: Set permission for index.sh
+        script: chmod +x ./index.sh
+      - name: Build Debug APK (Native Gradle)
+        script: ./index.sh --native-android -p debug
     artifacts:
-      - android/app/build/outputs/**/*.apk
-
-  android_apk_release_free_safe:
-    name: Android APK (Release - Free Safe)
-    max_build_duration: 60
-    environment:
-      node: 20
-      java: 17
-      groups:
-        - android_keystore
-    scripts:
-      - name: Install dependencies
-        script: |
-          if [ -f package-lock.json ]; then npm ci; else npm i; fi
-      - name: (Optional) Expo prebuild
-        script: |
-          if [ ! -d android ] || [ ! -f android/gradlew ]; then
-            npx --yes expo prebuild --platform android || true
-          else
-            echo "android/ sudah ada — skip prebuild"
-          fi
-      - name: Jalankan autopatch (signing env)
-        script: |
-          if [ -f tools/autopatch_tools_android.sh ]; then
-            bash tools/autopatch_tools_android.sh
-          else
-            echo "autopatch_tools_android.sh tiada — terus build"
-          fi
-      - name: Build APK (Release)
-        script: |
-          cd android
-          chmod +x ./gradlew || true
-          ./gradlew assembleRelease --no-daemon --stacktrace
-    artifacts:
-      - android/app/build/outputs/**/*.apk
-      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/apk/debug/*.apk
