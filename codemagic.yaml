@@ -15,13 +15,11 @@ workflows:
           [ -d tools ] && ls -la tools | head -n 30 || echo "tools/ tiada"
           echo "--- android/"
           [ -d android ] && ls -la android | head -n 30 || echo "android/ tiada"
-
       - name: Install dependencies
         script: |
           if [ -f package-lock.json ]; then npm ci; else npm i; fi
           node -v
           npm -v
-
       - name: Expo prebuild (jika android/ tiada)
         script: |
           if [ ! -d android ] || [ ! -f android/gradlew ]; then
@@ -29,7 +27,6 @@ workflows:
           else
             echo "android/ sudah ada — skip prebuild"
           fi
-
       - name: Jalankan autopatch (optional)
         script: |
           if [ -f tools/autopatch_tools_android.sh ]; then
@@ -37,13 +34,11 @@ workflows:
           else
             echo "autopatch_tools_android.sh tiada — terus build"
           fi
-
       - name: Build APK (Debug)
         script: |
           cd android
           chmod +x ./gradlew || true
           ./gradlew assembleDebug --no-daemon --stacktrace
-
     artifacts:
       - android/app/build/outputs/**/*.apk
 
@@ -60,15 +55,13 @@ workflows:
       - name: Install dependencies
         script: |
           if [ -f package-lock.json ]; then npm ci; else npm i; fi
-
       - name: (Opsyenal) Expo prebuild
         script: |
           if [ ! -d android ] || [ ! -f android/gradlew ]; then
             npx --yes expo prebuild --platform android || true
           else
-            echo "android/ sudah ada — skip prebuild"
+            echo "android/ sudah ada — skip expo prebuild"
           fi
-
       - name: Jalankan autopatch (signing env)
         script: |
           if [ -f tools/autopatch_tools_android.sh ]; then
@@ -76,13 +69,11 @@ workflows:
           else
             echo "autopatch_tools_android.sh tiada — terus build"
           fi
-
       - name: Build APK (Release)
         script: |
           cd android
           chmod +x ./gradlew || true
           ./gradlew assembleRelease --no-daemon --stacktrace
-
     artifacts:
       - android/app/build/outputs/**/*.apk
       - android/app/build/outputs/**/*.aab
