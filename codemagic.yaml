@@ -1,5 +1,5 @@
 workflows:
-  android_apk_debug:
+  android_apk_debug_free_safe:
     name: Android APK (Debug - Free Safe)
     max_build_duration: 60
     environment:
@@ -24,7 +24,7 @@ workflows:
     artifacts:
       - android/app/build/outputs/**/*.apk
 
-  android_apk_release:
+  android_apk_release_free_safe:
     name: Android APK (Release - Free Safe)
     max_build_duration: 60
     environment:
