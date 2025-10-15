@@ -15,19 +15,15 @@ workflows:
       - name: Permission
         script: chmod +x ./index.sh
 
-      # Pastikan Expo CLI wujud (guna npm, elak isu Yarn/corepack)
       - name: Ensure Expo CLI
         script: |
           corepack disable || true
           npm i -g expo@latest
           expo --version
 
-      # Ikut README: JANGAN --no-install bila mula; biar skrip urus deps kalau perlu
-      # Untuk pastikan prebuild betul, paksa regenerate: buang android/ dulu
       - name: Remove existing android/ (force regenerate)
         script: rm -rf android
 
-      # Build debug native — index.sh akan install deps (jika perlu) & run prebuild bila android/ tiada
       - name: Build Debug APK (Native)
         script: ./index.sh --native-android -p debug
 
