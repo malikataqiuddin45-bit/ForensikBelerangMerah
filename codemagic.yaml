@@ -1,35 +1,19 @@
 workflows:
-  expo_native_android_debug:
-    name: Expo Native Android (Debug)
+  expo_apk_debug_native:
+    name: Expo Native Debug Build
     environment:
       node: 20
       java: 17
-      vars:
-        NODE_OPTIONS: --max-old-space-size=4096
     scripts:
-      - name: Make index.sh executable
-        script: chmod +x ./index.sh
-
-      # Pastikan Expo CLI wujud via npm (elak Yarn/corepack error di Codemagic)
-      - name: Ensure Expo CLI (npm)
+      - name: Set permission
+        script: chmod +x index.sh
+      - name: Install Expo CLI (README)
         script: |
           corepack disable || true
           npm i -g expo@latest
           expo --version
-
-      # Install dependencies projek (guna lockfile jika ada)
-      - name: Install dependencies (npm)
-        script: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm i
-          fi
-
-      # Build debug native — SEBIJI ikut index.sh/README
-      - name: Build Debug APK (Native)
+      - name: Build Debug Native (follow README)
         script: ./index.sh --native-android -p debug
-
     artifacts:
+      - android/app/build/outputs/**/*.apk
       - builds/android/*.apk
-      - android/app/build/outputs/apk/debug/*.apk
