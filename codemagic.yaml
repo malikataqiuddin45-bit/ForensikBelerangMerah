@@ -5,6 +5,7 @@ workflows:
       node: 20
       java: 17
       vars:
+        CI: true
         NODE_OPTIONS: --max-old-space-size=4096
     scripts:
       - name: Permission
@@ -16,9 +17,17 @@ workflows:
           npm i -g expo@latest
           expo --version
 
-      # Uncomment baris bawah ni jika perlu regenerate android/
-      # - name: Force Expo prebuild (clean)
-      #   script: npx expo prebuild --platform android --clean --no-install
+      - name: Install dependencies (npm)
+        script: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm i
+          fi
+
+      # Prebuild supaya android/ regenerate ikut Expo config (tiada install semula)
+      - name: Expo prebuild (android, no-install)
+        script: npx expo prebuild --platform android --no-install
 
       - name: Build Debug APK (Native Gradle)
         script: ./index.sh --native-android -p debug --no-install
