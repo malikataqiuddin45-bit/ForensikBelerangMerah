@@ -10,12 +10,14 @@ workflows:
       - name: Make index.sh executable
         script: chmod +x ./index.sh
 
-      - name: Ensure Expo CLI (npm; avoid Yarn/corepack)
+      # Pastikan Expo CLI wujud via npm (elak Yarn/corepack error di Codemagic)
+      - name: Ensure Expo CLI (npm)
         script: |
           corepack disable || true
           npm i -g expo@latest
           expo --version
 
+      # Install dependencies projek (guna lockfile jika ada)
       - name: Install dependencies (npm)
         script: |
           if [ -f package-lock.json ]; then
@@ -24,12 +26,7 @@ workflows:
             npm i
           fi
 
-      - name: (Optional) Expo prebuild if missing
-        script: |
-          if [ ! -d android ]; then
-            npx expo prebuild --platform android --no-install
-          fi
-
+      # Build debug native — SEBIJI ikut index.sh/README
       - name: Build Debug APK (Native)
         script: ./index.sh --native-android -p debug
 
