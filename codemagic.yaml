@@ -10,7 +10,7 @@ workflows:
       - name: Make index.sh executable
         script: chmod +x ./index.sh
 
-      - name: Ensure Expo CLI (via npm, avoid Yarn/corepack)
+      - name: Ensure Expo CLI (npm; avoid Yarn/corepack)
         script: |
           corepack disable || true
           npm i -g expo@latest
@@ -22,6 +22,12 @@ workflows:
             npm ci
           else
             npm i
+          fi
+
+      - name: (Optional) Expo prebuild if missing
+        script: |
+          if [ ! -d android ]; then
+            npx expo prebuild --platform android --no-install
           fi
 
       - name: Build Debug APK (Native)
