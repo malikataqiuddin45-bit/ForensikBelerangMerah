@@ -1,5 +1,5 @@
 workflows:
-  expo_native_debug:
+  expo_apk_debug_native:
     name: Expo Native Debug Build
     max_build_duration: 60
     environment:
