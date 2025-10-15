@@ -1,6 +1,7 @@
 workflows:
-  expo_apk_debug_native:
-    name: Expo APK Debug (Native)
+  expo_native_debug:
+    name: Expo Native Debug Build
+    max_build_duration: 60
     environment:
       node: 20
       java: 17
@@ -12,20 +13,18 @@ workflows:
         - pattern: main
           include: true
     scripts:
-      - name: Permission
+      - name: Set permission
         script: chmod +x ./index.sh
 
-      - name: Ensure Expo CLI
+      - name: Install Expo CLI (README)
         script: |
           corepack disable || true
           npm i -g expo@latest
           expo --version
 
-      - name: Remove existing android/ (force regenerate)
-        script: rm -rf android
-
-      - name: Build Debug APK (Native)
+      - name: Build Debug Native (follow README)
         script: ./index.sh --native-android -p debug
 
     artifacts:
+      - builds/android/app-debug.apk
       - android/app/build/outputs/apk/debug/*.apk
