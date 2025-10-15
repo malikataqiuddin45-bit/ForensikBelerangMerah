@@ -1,30 +1,22 @@
 workflows:
-  expo_apk_debug_native:
+  expo_native_debug:
     name: Expo Native Debug Build
-    max_build_duration: 60
     environment:
       node: 20
       java: 17
       vars:
         NODE_OPTIONS: --max-old-space-size=4096
-    triggering:
-      events: [ push ]
-      branch_patterns:
-        - pattern: main
-          include: true
     scripts:
-      - name: Set permission
+      - name: Permission
         script: chmod +x ./index.sh
-
-      - name: Install Expo CLI (README)
+      - name: Ensure Expo CLI (npm)
         script: |
           corepack disable || true
           npm i -g expo@latest
           expo --version
-
-      - name: Build Debug Native (follow README)
+      # android/ dah dibuang, index.sh akan auto-prebuild
+      - name: Build Debug APK (Native)
         script: ./index.sh --native-android -p debug
-
     artifacts:
       - builds/android/app-debug.apk
       - android/app/build/outputs/apk/debug/*.apk
