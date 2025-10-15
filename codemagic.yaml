@@ -5,32 +5,21 @@ workflows:
       node: 20
       java: 17
       vars:
-        CI: true
         NODE_OPTIONS: --max-old-space-size=4096
     scripts:
       - name: Permission
         script: chmod +x ./index.sh
 
-      - name: Ensure Expo CLI (npm, not yarn)
+      # Pasang Expo CLI global guna npm (elak yarn/corepack isu)
+      - name: Ensure Expo CLI (npm)
         script: |
           corepack disable || true
           npm i -g expo@latest
           expo --version
 
-      - name: Install dependencies (npm)
-        script: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm i
-          fi
-
-      # Prebuild supaya android/ regenerate ikut Expo config (tiada install semula)
-      - name: Expo prebuild (android, no-install)
-        script: npx expo prebuild --platform android --no-install
-
+      # Ikut README: BIARKAN index.sh urus install + prebuild bila perlu
       - name: Build Debug APK (Native Gradle)
-        script: ./index.sh --native-android -p debug --no-install
+        script: ./index.sh --native-android -p debug
 
     artifacts:
       - android/app/build/outputs/apk/debug/*.apk
