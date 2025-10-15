@@ -10,16 +10,33 @@ workflows:
       - name: Permission
         script: chmod +x ./index.sh
 
-      # Pasang Expo CLI global guna npm (elak yarn/corepack isu)
       - name: Ensure Expo CLI (npm)
         script: |
           corepack disable || true
           npm i -g expo@latest
           expo --version
 
-      # Ikut README: BIARKAN index.sh urus install + prebuild bila perlu
-      - name: Build Debug APK (Native Gradle)
-        script: ./index.sh --native-android -p debug
+      - name: Install dependencies
+        script: |
+          if [ -f package-lock.json ]; then npm ci; else npm i; fi
 
+      # ✅ REGENERATE ANDROID DENGAN PLUGIN EXPO
+      - name: Expo prebuild (android --clean)
+        script: npx expo prebuild --platform android --clean --no-install
+
+      - name: Gradle clean
+        script: |
+          cd android
+          ./gradlew clean
+          cd -
+
+      - name: Build Debug APK (Native Gradle)
+        script: ./index.sh --native-android -p debug --no-install
+
+      # 🔎 Sanity check (pilihan): pastikan plugin 'expo' wujud dalam app/build.gradle(.kts)
+      - name: Verify expo plugin present
+        script: |
+          grep -Rqn 'id("expo")' android/app/build.gradle* || \
+          { echo "❌ Plugin expo tak dikesan dalam app/build.gradle(.kts)"; exit 1; }
     artifacts:
       - android/app/build/outputs/apk/debug/*.apk
