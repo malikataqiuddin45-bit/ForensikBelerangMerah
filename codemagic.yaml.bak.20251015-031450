@@ -1,0 +1,27 @@
+workflows:
+  expo_apk_debug_native:
+    name: Expo APK Debug (Native)
+    environment:
+      node: 20
+      java: 17
+      vars:
+        NODE_OPTIONS: --max-old-space-size=4096
+    scripts:
+      - name: Permission
+        script: chmod +x ./index.sh
+
+      - name: Ensure Expo CLI (npm, not yarn)
+        script: |
+          corepack disable || true
+          npm i -g expo@latest
+          expo --version
+
+      # Uncomment baris bawah ni jika perlu regenerate android/
+      # - name: Force Expo prebuild (clean)
+      #   script: npx expo prebuild --platform android --clean --no-install
+
+      - name: Build Debug APK (Native Gradle)
+        script: ./index.sh --native-android -p debug --no-install
+
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk

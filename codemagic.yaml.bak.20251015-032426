@@ -1,0 +1,25 @@
+workflows:
+  expo_apk_debug_native:
+    name: Expo APK Debug (Native)
+    environment:
+      node: 20
+      java: 17
+      vars:
+        NODE_OPTIONS: --max-old-space-size=4096
+    scripts:
+      - name: Permission
+        script: chmod +x ./index.sh
+
+      # Pasang Expo CLI global guna npm (elak yarn/corepack isu)
+      - name: Ensure Expo CLI (npm)
+        script: |
+          corepack disable || true
+          npm i -g expo@latest
+          expo --version
+
+      # Ikut README: BIARKAN index.sh urus install + prebuild bila perlu
+      - name: Build Debug APK (Native Gradle)
+        script: ./index.sh --native-android -p debug
+
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk

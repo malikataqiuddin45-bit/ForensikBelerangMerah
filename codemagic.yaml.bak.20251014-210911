@@ -1,0 +1,21 @@
+workflows:
+  expo_apk_debug_native:
+    name: Expo APK Debug (Native)
+    max_build_duration: 60
+    environment:
+      vars:
+        NODE_OPTIONS: --max-old-space-size=4096
+      node: 20
+      java: 17
+    triggering:
+      events: [ push ]
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Set permission for index.sh
+        script: chmod +x ./index.sh
+      - name: Build Debug APK (Native Gradle)
+        script: ./index.sh --native-android -p debug
+    artifacts:
+      - android/app/build/outputs/apk/debug/*.apk
