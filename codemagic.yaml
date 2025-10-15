@@ -6,37 +6,30 @@ workflows:
       java: 17
       vars:
         NODE_OPTIONS: --max-old-space-size=4096
+    triggering:
+      events: [ push ]
+      branch_patterns:
+        - pattern: main
+          include: true
     scripts:
       - name: Permission
         script: chmod +x ./index.sh
 
-      - name: Ensure Expo CLI (npm)
+      # Pastikan Expo CLI wujud (guna npm, elak isu Yarn/corepack)
+      - name: Ensure Expo CLI
         script: |
           corepack disable || true
           npm i -g expo@latest
           expo --version
 
-      - name: Install dependencies
-        script: |
-          if [ -f package-lock.json ]; then npm ci; else npm i; fi
+      # Ikut README: JANGAN --no-install bila mula; biar skrip urus deps kalau perlu
+      # Untuk pastikan prebuild betul, paksa regenerate: buang android/ dulu
+      - name: Remove existing android/ (force regenerate)
+        script: rm -rf android
 
-      # ✅ REGENERATE ANDROID DENGAN PLUGIN EXPO
-      - name: Expo prebuild (android --clean)
-        script: npx expo prebuild --platform android --clean --no-install
+      # Build debug native — index.sh akan install deps (jika perlu) & run prebuild bila android/ tiada
+      - name: Build Debug APK (Native)
+        script: ./index.sh --native-android -p debug
 
-      - name: Gradle clean
-        script: |
-          cd android
-          ./gradlew clean
-          cd -
-
-      - name: Build Debug APK (Native Gradle)
-        script: ./index.sh --native-android -p debug --no-install
-
-      # 🔎 Sanity check (pilihan): pastikan plugin 'expo' wujud dalam app/build.gradle(.kts)
-      - name: Verify expo plugin present
-        script: |
-          grep -Rqn 'id("expo")' android/app/build.gradle* || \
-          { echo "❌ Plugin expo tak dikesan dalam app/build.gradle(.kts)"; exit 1; }
     artifacts:
       - android/app/build/outputs/apk/debug/*.apk
